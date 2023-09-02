@@ -95,7 +95,7 @@ const renderCategoryItems = async categoryId => {
         }
 
         const items = categoryItems.map(item => {
-            return `<div class="flex flex-col">
+            return `<div class="flex flex-col max-w-[312px] hover:-translate-y-2 duration-300">
                         <div class="relative">
                             ${item.others.posted_date === "" ? "" :`<span class="absolute bg-dark17 px-[5px] py-[4px] rounded text-white text-[10px] right-3 bottom-3">${formatTime(parseInt(item.others.posted_date))}</span>`}
                             <img class="h-[200px] w-[312px] rounded-lg" src="${item.thumbnail}" alt="thumbnail">
@@ -116,7 +116,7 @@ const renderCategoryItems = async categoryId => {
 
 
         categoryItemsContainer.innerHTML = `
-            <div class="grid grid-cols-4 mt-10 gap-6">${items.join('')}</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-10 gap-6 justify-items-center">${items.join('')}</div>
         `
 
         isLastRenderedCategoryItemsSorted = sortByView
