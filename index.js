@@ -1,25 +1,6 @@
 let sortByView = false
 let lastSelectedCategoryId
-
-const styleSortByViewButton = () => {
-    const sortByViewButtton = document.getElementById('sort-by-view-button')
-    
-    const grayStyle = ['text-dark25', 'bg-gray3720', 'font-medium']
-    const redStyle = ['text-white', 'bg-red3d', 'font-semibold']
-    
-    if(sortByView) {
-        sortByViewButtton.classList.remove(...grayStyle)
-        sortByViewButtton.classList.add(...redStyle)
-    } else {
-        sortByViewButtton.classList.remove(...redStyle)
-        sortByViewButtton.classList.add(...grayStyle)
-    }
-}
-
-const sortByViewHandler = () => {
-    sortByView = !sortByView
-    styleSortByViewButton()
-}
+let isLastRenderedCategoryItemsSorted
 
 const categoryHandler = async () => {
     const response = await fetch('https://openapi.programming-hero.com/api/videos/categories')
@@ -72,8 +53,15 @@ const renderCategoryItems = async categoryId => {
             </div>
         `
     } else {
+        if(sortByView) {
+            categoryItems.sort((a, b) => {
+                const viewA = parseFloat(a.others.views.slice(0, -1))
+                const viewB = parseFloat(b.others.views.slice(0, -1))
+                return viewB - viewA
+            })
+        }
+
         const items = categoryItems.map(item => {
-            console.log(item.title, item.authors[0].verified)
             return `<div class="flex flex-col">
                         <div class="relative">
                             ${item.others.posted_date === "" ? "" :`<span class="absolute bg-dark17 px-[5px] py-[4px] rounded text-white text-[10px] right-3 bottom-3">${formatTime(parseInt(item.others.posted_date))}</span>`}
@@ -97,18 +85,45 @@ const renderCategoryItems = async categoryId => {
         categoryItemsContainer.innerHTML = `
             <div class="grid grid-cols-4 mt-10 gap-6">${items.join('')}</div>
         `
+
+        isLastRenderedCategoryItemsSorted = sortByView
     }
 }
 
 const selectCategory = async categoryId => {
-    if(categoryId === lastSelectedCategoryId) {
-        return
+    if(categoryId !== lastSelectedCategoryId) {
+        styleCategoryButtons(categoryId)
     }
 
-    styleCategoryButtons(categoryId)
-    renderCategoryItems(categoryId)
+    if(isLastRenderedCategoryItemsSorted !== sortByView || categoryId !== lastSelectedCategoryId) {
+        renderCategoryItems(categoryId)
+    }
 
     lastSelectedCategoryId = categoryId
+}
+
+const styleSortByViewButton = () => {
+    const sortByViewButtton = document.getElementById('sort-by-view-button')
+    
+    const grayStyle = ['text-dark25', 'bg-gray3720', 'font-medium']
+    const redStyle = ['text-white', 'bg-red3d', 'font-semibold']
+    
+    if(sortByView) {
+        sortByViewButtton.classList.remove(...grayStyle)
+        sortByViewButtton.classList.add(...redStyle)
+    } else {
+        sortByViewButtton.classList.remove(...redStyle)
+        sortByViewButtton.classList.add(...grayStyle)
+    }
+}
+
+const sortByViewHandler = () => {
+    sortByView = !sortByView
+    styleSortByViewButton()
+
+    if(lastSelectedCategoryId) {
+        selectCategory(lastSelectedCategoryId)
+    }
 }
 
 const main = async () => {
