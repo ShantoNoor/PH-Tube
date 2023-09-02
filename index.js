@@ -79,7 +79,7 @@ const renderCategoryItems = async categoryId => {
     if(categoryItems.length === 0) {
         disableSortByViewButton()
         categoryItemsContainer.innerHTML = `
-            <div class="text-center mt-[180px]">
+            <div class="text-center mt-[50px] lg:mt-[150px]">
                 <img class="mx-auto h-[140px] mb-8" src="./images/novideo.svg" alt="No Video">
                 <p class="text-dark17 font-bold text-[32px] leading-[40px]">Oops!! Sorry, There is no<br> content here</p>
             </div>
@@ -116,7 +116,7 @@ const renderCategoryItems = async categoryId => {
 
 
         categoryItemsContainer.innerHTML = `
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-10 gap-6 justify-items-center">${items.join('')}</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 mt-10 gap-6 justify-items-center">${items.join('')}</div>
         `
 
         isLastRenderedCategoryItemsSorted = sortByView
