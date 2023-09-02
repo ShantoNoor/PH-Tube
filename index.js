@@ -4,8 +4,8 @@ let lastSelectedCategoryId
 const styleSortByViewButton = () => {
     const sortByViewButtton = document.getElementById('sort-by-view-button')
     
-    const grayStyle = ['text-dark25', 'bg-gray3720', 'font-medium'];
-    const redStyle = ['text-white', 'bg-red3d', 'font-semibold'];
+    const grayStyle = ['text-dark25', 'bg-gray3720', 'font-medium']
+    const redStyle = ['text-white', 'bg-red3d', 'font-semibold']
     
     if(sortByView) {
         sortByViewButtton.classList.remove(...grayStyle)
@@ -24,22 +24,18 @@ const sortByViewHandler = () => {
 const categoryHandler = async () => {
     const response = await fetch('https://openapi.programming-hero.com/api/videos/categories')
     const json = await response.json()
-    const categoryDatas = json.data;
+    const categoryDatas = json.data
     
-    const categoryButtonsContainer = document.getElementById('category-buttons-container');
-    const categoryButtons = categoryDatas.map(categoryData => `<button id="${categoryData.category_id}" class="text-lg font-medium rounded-[4px] px-5 py-[8px] duration-300 hover:-translate-y-1 hover:shadow-md active:translate-y-[-2px] active:shadow-sm text-3770 bg-gray3715" onclick="selectCategory('${categoryData.category_id}')">${categoryData.category}</button>`);
+    const categoryButtonsContainer = document.getElementById('category-buttons-container')
+    const categoryButtons = categoryDatas.map(categoryData => `<button id="${categoryData.category_id}" class="text-lg font-medium rounded-[4px] px-5 py-[5px] duration-300 hover:-translate-y-1 hover:shadow-md active:translate-y-[-2px] active:shadow-sm text-3770 bg-gray3715" onclick="selectCategory('${categoryData.category_id}')">${categoryData.category}</button>`)
     categoryButtonsContainer.innerHTML = categoryButtons.join('')
 
     return categoryDatas[0].category_id
 }
 
-const selectCategory = categoryId => {
-    if(categoryId === lastSelectedCategoryId) {
-        return
-    }
-
-    const grayStyle = ['text-3770', 'bg-gray3715', 'font-medium'];
-    const redStyle = ['text-white', 'bg-red3d', 'font-semibold'];
+const styleCategoryButtons = categoryId => {
+    const grayStyle = ['text-3770', 'bg-gray3715', 'font-medium']
+    const redStyle = ['text-white', 'bg-red3d', 'font-semibold']
 
     if(lastSelectedCategoryId) {
         const lastSelectedCategoryButton = document.getElementById(lastSelectedCategoryId)
@@ -50,13 +46,74 @@ const selectCategory = categoryId => {
     const selectedCategoryButton = document.getElementById(categoryId)
     selectedCategoryButton.classList.remove(...grayStyle)
     selectedCategoryButton.classList.add(...redStyle)
+}
+
+const formatTime = seconds => {
+    const hours = Math.floor(seconds / 3600)
+    const min_seconds = seconds % 3600
+    const minutes = Math.floor(min_seconds / 60)
+
+    return `${hours}hrs ${minutes} min ago`
+}
+
+const renderCategoryItems = async categoryId => {
+    const response = await fetch('https://openapi.programming-hero.com/api/videos/category/' + categoryId)
+    const json = await response.json()
+    const categoryItems = json.data
+
+    const categoryItemsContainer = document.getElementById('category-items-container')
+    categoryItemsContainer.innerHTML = ''
+
+    if(categoryItems.length === 0) {
+        categoryItemsContainer.innerHTML = `
+            <div class="text-center mt-[180px]">
+                <img class="mx-auto h-[140px] mb-8" src="./images/novideo.svg" alt="No Video">
+                <p class="text-dark17 font-bold text-[32px] leading-[40px]">Oops!! Sorry, There is no<br> content here</p>
+            </div>
+        `
+    } else {
+        const items = categoryItems.map(item => {
+            console.log(item.title, item.authors[0].verified)
+            return `<div class="flex flex-col">
+                        <div class="relative">
+                            ${item.others.posted_date === "" ? "" :`<span class="absolute bg-dark17 px-[5px] py-[4px] rounded text-white text-[10px] right-3 bottom-3">${formatTime(parseInt(item.others.posted_date))}</span>`}
+                            <img class="h-[200px] w-[312px] rounded-lg" src="${item.thumbnail}" alt="thumbnail">
+                        </div>
+                        <div class="flex gap-3 mt-5">
+                            <img class="h-[40px] w-[40px] rounded-[40px]" src="${item.authors[0].profile_picture}" alt="Profile Picture of ${item.authors[0].profile_name}">
+                            <div>
+                                <h1 class="text-[dark17] text-base font-bold leading-6">${item.title}</h1>
+                                <div>
+                                    <span class="text-gray2370 text-sm font-normal">${item.authors[0].profile_name}</span>
+                                    ${item.authors[0].verified == true ? `<img class="inline" src="./images/tick.svg" alt="Blue Tick">` : ''}
+                                </div>
+                                <span class="text-gray2370 text-sm font-normal">${item.others.views} views</span>
+                            </div>
+                        </div>
+                    </div>`
+        })
+
+
+        categoryItemsContainer.innerHTML = `
+            <div class="grid grid-cols-4 mt-10 gap-6">${items.join('')}</div>
+        `
+    }
+}
+
+const selectCategory = async categoryId => {
+    if(categoryId === lastSelectedCategoryId) {
+        return
+    }
+
+    styleCategoryButtons(categoryId)
+    renderCategoryItems(categoryId)
 
     lastSelectedCategoryId = categoryId
 }
 
 const main = async () => {
     const categoryToBeSelected = await categoryHandler()
-    selectCategory(categoryToBeSelected)
+    await selectCategory(categoryToBeSelected)
 }
 
 main()
