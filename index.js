@@ -37,6 +37,37 @@ const formatTime = seconds => {
     return `${hours}hrs ${minutes} min ago`
 }
 
+const styleSortByViewButton = (isDisabled=false) => {
+    const sortByViewButtton = document.getElementById('sort-by-view-button')
+    
+    const grayStyle = ['text-dark25', 'bg-gray3720', 'font-medium']
+    const redStyle = ['text-white', 'bg-red3d', 'font-semibold']
+    
+    if(sortByView && !isDisabled) {
+        sortByViewButtton.classList.remove(...grayStyle)
+        sortByViewButtton.classList.add(...redStyle)
+    } else {
+        sortByViewButtton.classList.remove(...redStyle)
+        sortByViewButtton.classList.add(...grayStyle)
+    }
+}
+
+const disableSortByViewButton = (disable=true) => {
+    const sortByViewButtton = document.querySelector('#sort-by-view-button')
+
+    if(disable) {
+        sortByViewButtton.setAttribute('disabled', true)
+        // sortByViewButtton.classList.add('disabled:opacity-25')
+        sortByViewButtton.classList.remove('hover:-translate-y-1', 'hover:shadow-md', 'active:translate-y-[-2px]', 'active:shadow-sm')
+        styleSortByViewButton(true)
+    } else {
+        sortByViewButtton.removeAttribute('disabled')
+        // sortByViewButtton.classList.remove('disabled:opacity-25')
+        sortByViewButtton.classList.add('hover:-translate-y-1', 'hover:shadow-md', 'active:translate-y-[-2px]', 'active:shadow-sm')
+        styleSortByViewButton()
+    }
+}
+
 const renderCategoryItems = async categoryId => {
     const response = await fetch('https://openapi.programming-hero.com/api/videos/category/' + categoryId)
     const json = await response.json()
@@ -46,6 +77,7 @@ const renderCategoryItems = async categoryId => {
     categoryItemsContainer.innerHTML = ''
 
     if(categoryItems.length === 0) {
+        disableSortByViewButton()
         categoryItemsContainer.innerHTML = `
             <div class="text-center mt-[180px]">
                 <img class="mx-auto h-[140px] mb-8" src="./images/novideo.svg" alt="No Video">
@@ -53,6 +85,7 @@ const renderCategoryItems = async categoryId => {
             </div>
         `
     } else {
+        disableSortByViewButton(false)
         if(sortByView) {
             categoryItems.sort((a, b) => {
                 const viewA = parseFloat(a.others.views.slice(0, -1))
@@ -100,21 +133,6 @@ const selectCategory = async categoryId => {
     }
 
     lastSelectedCategoryId = categoryId
-}
-
-const styleSortByViewButton = () => {
-    const sortByViewButtton = document.getElementById('sort-by-view-button')
-    
-    const grayStyle = ['text-dark25', 'bg-gray3720', 'font-medium']
-    const redStyle = ['text-white', 'bg-red3d', 'font-semibold']
-    
-    if(sortByView) {
-        sortByViewButtton.classList.remove(...grayStyle)
-        sortByViewButtton.classList.add(...redStyle)
-    } else {
-        sortByViewButtton.classList.remove(...redStyle)
-        sortByViewButtton.classList.add(...grayStyle)
-    }
 }
 
 const sortByViewHandler = () => {
